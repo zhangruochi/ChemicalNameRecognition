@@ -41,9 +41,9 @@ conda activate chemdt
 
 4. run main function
 
-```
+```python
 cd tools
-python ChemDTClient.py
+python client.py
 ```
 
 #### APIs for extaction piplines
@@ -80,7 +80,7 @@ client.iupac_fixer("iupac_text")
 
 5. Full pipline
 
-```
+```python
 client = ChemDTClient()
 pdf_path = '../test_data/p2.pdf'
 save_dir = '../pdf_images'
