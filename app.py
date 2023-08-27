@@ -22,8 +22,10 @@ from ChemicalNameRecognition.to_db import Csv2DB
 cfg = OmegaConf.load(os.path.join(root_dir, "conf.yaml"))
 
 DB_CLIENT = Csv2DB(cfg.db.db_path, cfg.patents.dir, cfg.db.batch_size)
-MIN_MOL_WEIGHT = 200
-LIMIT = 500
+
+MIN_MOL_WEIGHT = cfg.visualization.min_mol_weight
+LIMIT = cfg.visualization.max_molecules
+
 DES_LIST = ['MolWt', 'NumHAcceptors',
             'NumHDonors', 'MolLogP', 'NumRotatableBonds']
 

@@ -7,6 +7,7 @@ from pathlib import Path
 import sqlite3
 from tqdm import tqdm
 import pandas as pd
+from rdkit import Chem
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(root_dir))
@@ -32,8 +33,11 @@ class Csv2DB():
         all_csv = list(self.dir.glob("*.csv"))
         with sqlite3.connect(self.db_path) as con:
             cursor = con.cursor()
+            all_tuples = []
             for csv_file in tqdm(all_csv, total=len(all_csv)):
-                all_tuples = self.read_csv( csv_file)
+                all_tuples.extend(self.read_csv(csv_file))
+
+            print("total number of tuples: ", len(all_tuples))
 
             for i in range(0, len(all_tuples), self.batch_size):
                 cursor.executemany(
@@ -50,8 +54,12 @@ class Csv2DB():
             for iu, s in zip(eval(row["iupac_list"]), eval(row["smiles"])):
                 if len(s.strip()) == 0:
                     continue 
-                all_tuples.append((row["target"], row["patent_id"], row["image_path"], iu.strip(), s.strip()))
-
+                try: 
+                    mol = Chem.MolFromSmiles(s.strip())
+                    if mol:
+                        all_tuples.append((row["target"], row["patent_id"], row["image_path"], iu.strip(), s.strip()))
+                except:
+                    pass 
         df.apply(func = func, axis = 1)
     
         return all_tuples
@@ -66,6 +74,10 @@ class Csv2DB():
 
         return res
 
+    def count_total_moelcules(self):
+        query = "SELECT COUNT(*) FROM target_mols;"
+        return self.execute(query).fetchone()[0]
+
     def execute(self, query):
         with sqlite3.connect(self.db_path) as con:
             cursor = con.cursor()
@@ -79,6 +91,8 @@ if __name__ == "__main__":
     cfg = OmegaConf.load(os.path.join(root_dir, "conf.yaml"))
     client = Csv2DB(cfg.db.db_path, cfg.patents.dir, cfg.db.batch_size)
     client.insert_patent_data()
+
+    print("total molecules in database: ", client.count_total_moelcules())
     res = client.select(10)
 
     df = pd.DataFrame(data = res, columns=["target", "patent", "page", "iupac", "smiles"])

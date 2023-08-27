@@ -106,6 +106,15 @@ client.run_pipline(pdf_path, save_dir = save_dir)
 
 #### Run webserver for ChemDTD for visualizing your local database
 
-```sh
-streamlit run app.py
+
+1. Write extracting data to the local database. You need modify the configuration in `conf.yaml`
 ```
+python to_db.py
+```
+
+1. Start webserver and wait a moment to let the front-end to load all your data. 
+```sh
+streamlit run app.py --server.addres 0.0.0.0 --server.port 5001
+```
+2. View your app in your browser with port 5001
+
