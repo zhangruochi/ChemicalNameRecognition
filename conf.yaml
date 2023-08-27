@@ -1,0 +1,7 @@
+db:
+  db_path: "./chemDTD.db"
+  batch_size: 64
+
+
+patents:
+  dir: "./data_dir"
